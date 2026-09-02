@@ -32,6 +32,12 @@ test-unit:
 run:
 	uv run streamlit run src/app.py
 
+benchmark:
+	uv run python scripts/run_benchmark.py
+
+sample-data:
+	uv run python scripts/download_sample_data.py --force-sample
+
 clean:
 	rm -rf .pytest_cache .mypy_cache .ruff_cache htmlcov .coverage
 	find . -type d -name "__pycache__" -exec rm -rf {} +

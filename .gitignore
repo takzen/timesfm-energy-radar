@@ -66,3 +66,7 @@ htmlcov/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Generated reports
+reports/
+*.csv
