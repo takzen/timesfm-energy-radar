@@ -39,7 +39,13 @@ env.bak/
 venv.bak/
 
 # Data and large artifacts
-data/
+data/*
+!data/raw/
+!data/processed/
+!data/models/
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/models/.gitkeep
 *.parquet
 *.feather
 *.h5
