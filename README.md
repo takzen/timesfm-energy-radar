@@ -25,47 +25,55 @@ A high-performance multivariate time-series forecasting system benchmarking **Go
 ```mermaid
 flowchart TD
     subgraph Ingestion["🔌 Ingestion Layer"]
-        PSE["PSE API v2<br/><i>Load, PV, Wind, Thermal, RCE Prices</i>"]
-        METEO["Open-Meteo API<br/><i>Solar Irradiance, Wind 100m, Temperature</i>"]
-        RAW[("data/raw/<br/>Raw Parquet Storage")]
+        PSE["<b>PSE API v2</b><br/>Load, PV, Wind, Thermal, RCE Prices"]
+        METEO["<b>Open-Meteo API</b><br/>Solar Irradiance, Wind 100m, Temperature"]
+        RAW[("<b>data/raw/</b><br/>Raw Parquet Storage")]
         PSE --> RAW
         METEO --> RAW
     end
 
     subgraph Processing["🧹 ETL & Feature Engineering"]
-        ETL["Temporal Alignment & Cleaning<br/><i>Europe/Warsaw TZ, DST handling, Missing Imputation</i>"]
-        FEATS["Exogenous Feature Store<br/><i>Calendar, Lags, Weather Covariates</i>"]
-        PROC[("data/processed/<br/>Engineered Datasets")]
+        ETL["<b>Temporal Alignment & Cleaning</b><br/>Europe/Warsaw TZ, DST handling, Imputation"]
+        FEATS["<b>Exogenous Feature Store</b><br/>Calendar, Lags, Weather Covariates"]
+        PROC[("<b>data/processed/</b><br/>Engineered Datasets")]
         RAW --> ETL --> FEATS --> PROC
     end
 
     subgraph Models["🧠 Multi-Horizon Forecasting Engine"]
-        TFM["Google TimesFM<br/><i>Zero-Shot Foundation Model</i>"]
-        BASE["Baselines<br/><i>LightGBM, Seasonal Naive</i>"]
+        TFM["<b>Google TimesFM</b><br/>Zero-Shot Foundation Model"]
+        BASE["<b>Baselines</b><br/>LightGBM, Seasonal Naive"]
         PROC --> TFM
         PROC --> BASE
     end
 
     subgraph Evaluation["📊 Evaluation & Risk Suite"]
-        METRICS["Benchmark Engine<br/><i>MAE, RMSE, WAPE, Quantile Loss</i>"]
-        RISK["Renewable Curtailment Risk<br/><i>PV/Wind Oversupply Anomaly Detection</i>"]
+        METRICS["<b>Benchmark Engine</b><br/>MAE, RMSE, WAPE, Quantile Loss"]
+        RISK["<b>Renewable Curtailment Risk</b><br/>PV/Wind Oversupply Anomaly Detection"]
         TFM --> METRICS
         BASE --> METRICS
         TFM --> RISK
     end
 
     subgraph Presentation["🖥️ Mission Control UI"]
-        DASH["Streamlit & Plotly Dashboard<br/><i>Forecast Charts, Intervals, Curtailment Alerts, Leaderboard</i>"]
+        DASH["<b>Streamlit & Plotly Dashboard</b><br/>Forecast Charts, Intervals, Curtailment Alerts, Leaderboard"]
         METRICS --> DASH
         RISK --> DASH
     end
 
-    style PSE fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
-    style METEO fill:#e0f2f1,stroke:#00897b,stroke-width:2px
-    style RAW fill:#f5f5f5,stroke:#757575,stroke-width:1px
-    style TFM fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style RISK fill:#ffebee,stroke:#e53935,stroke-width:2px
-    style DASH fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px
+    classDef blueNode fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef greenNode fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc;
+    classDef amberNode fill:#451a03,stroke:#fbbf24,stroke-width:2px,color:#f8fafc;
+    classDef redNode fill:#4c0519,stroke:#f43f5e,stroke-width:2px,color:#f8fafc;
+    classDef purpleNode fill:#3b0764,stroke:#c084fc,stroke-width:2px,color:#f8fafc;
+    classDef darkNode fill:#18181b,stroke:#a1a1aa,stroke-width:2px,color:#f8fafc;
+
+    class PSE,METEO blueNode;
+    class RAW,PROC darkNode;
+    class ETL,FEATS greenNode;
+    class TFM amberNode;
+    class BASE darkNode;
+    class METRICS,RISK redNode;
+    class DASH purpleNode;
 ```
 
 ---
