@@ -135,25 +135,25 @@ class TimesFMModel(Forecaster):
         # If TimesFM model is loaded with weights
         if self._model is not None:
             try:
-                # Prepare optional past/future covariates
-                covariates: np.ndarray | None = None
-                if future_covariates_df is not None:
-                    cov_cols = [c for c in future_covariates_df.columns if c != "timestamp"]
-                    if cov_cols:
-                        covariates = future_covariates_df[cov_cols].to_numpy().astype(np.float32)
-
                 tfm_out = self._model.predict(
                     context=context_series,
                     horizon=horizon,
-                    past_future_covariates=covariates,
                     return_quantiles=True,
                 )
-                point_pred = np.array(tfm_out.point_forecast).flatten()
-                q_dict = {
-                    alpha: np.array(tfm_out.quantiles[alpha]).flatten().tolist()
-                    for alpha in self.quantile_alphas
-                    if alpha in getattr(tfm_out, "quantiles", {})
-                }
+                point_pred = np.array(tfm_out.forecast).flatten()
+
+                q_dict = {}
+                if tfm_out.quantiles is not None and len(tfm_out.quantiles.shape) == 2:
+                    # TimesFM 3.0 returns 9 quantiles (0.1, 0.2, ..., 0.9)
+                    q_map = {0.1: 0, 0.5: 4, 0.9: 8}
+                    for alpha in self.quantile_alphas:
+                        idx = q_map.get(alpha, int(round(alpha * 10)) - 1)
+                        if 0 <= idx < tfm_out.quantiles.shape[1]:
+                            q_dict[alpha] = tfm_out.quantiles[:, idx].flatten().tolist()
+                else:
+                    _, q_arr_dict = self._generate_surrogate_forecast(context_series, horizon)
+                    q_dict = {a: q_arr_dict[a].tolist() for a in self.quantile_alphas}
+
             except Exception as e:
                 logger.warning(
                     "TimesFM forward pass failed ({}); falling back to surrogate mode.", e

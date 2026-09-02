@@ -215,12 +215,12 @@ def main() -> None:
                 title=f"{selected_model_name}: {horizon}h Forecast vs Actuals",
                 unit=unit,
             )
-            st.plotly_chart(fig_fc, use_container_width=True)
+            st.plotly_chart(fig_fc, width="stretch")
 
         with col_gauge:
             st.markdown("#### ⚠️ Curtailment Meter")
             fig_gauge = plot_curtailment_gauge(cur_re_ratio, alert_level=risk_level)
-            st.plotly_chart(fig_gauge, use_container_width=True)
+            st.plotly_chart(fig_gauge, width="stretch")
 
             if risk_level == "CRITICAL":
                 st.error(
@@ -239,7 +239,7 @@ def main() -> None:
         st.markdown("### 🔋 KSE National Generation Breakdown")
         recent_window = df.tail(168)  # Last 7 days
         fig_mix = plot_generation_mix(recent_window)
-        st.plotly_chart(fig_mix, use_container_width=True)
+        st.plotly_chart(fig_mix, width="stretch")
 
     elif page == "🏆 Benchmark Leaderboard":
         st.title("🏆 Time-Series Foundation Models Benchmark")
@@ -290,7 +290,7 @@ def main() -> None:
 
         st.markdown("---")
         st.markdown("### 🗄️ Dataset Schema Inspection")
-        st.dataframe(df.head(10).to_pandas(), use_container_width=True)
+        st.dataframe(df.head(10).to_pandas(), width="stretch")
 
 
 if __name__ == "__main__":

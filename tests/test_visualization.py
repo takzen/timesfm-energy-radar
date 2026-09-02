@@ -34,7 +34,7 @@ def test_plot_forecast_with_intervals() -> None:
     assert isinstance(fig, go.Figure)
     # Expected traces: Actuals, Q90 upper, Q10 lower filled, Point forecast
     assert len(fig.data) == 4
-    assert fig.layout.paper_bgcolor == "#0f172a"
+    assert fig.layout.paper_bgcolor == "#131722"
 
 
 def test_plot_generation_mix() -> None:

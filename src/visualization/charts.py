@@ -1,12 +1,26 @@
-"""Plotly interactive visualization components for forecasts, generation mix,
-and curtailment risk.
-"""
+"""Plotly interactive visualization components using TradingView / FinTech modern styling."""
 
 from collections.abc import Sequence
 from datetime import datetime
 
 import plotly.graph_objects as go
 import polars as pl
+
+# TradingView / FinTech Pro Dark Theme Palette
+THEME = {
+    "paper_bg": "#131722",
+    "plot_bg": "#1e222d",
+    "grid_color": "#2a2e39",
+    "text_color": "#f8fafc",
+    "text_muted": "#94a3b8",
+    "actual_color": "#00f0ff",  # Neon Cyan
+    "forecast_color": "#a855f7",  # Electric Violet
+    "interval_fill": "rgba(168, 85, 247, 0.16)",
+    "pv_color": "#f59e0b",  # Amber Solar
+    "wind_color": "#10b981",  # Emerald Wind
+    "thermal_color": "#475569",  # Slate Conventional
+    "demand_color": "#ff3b69",  # Neon Coral
+}
 
 
 def plot_forecast_with_intervals(
@@ -24,7 +38,7 @@ def plot_forecast_with_intervals(
     """Generate an interactive Plotly chart with point forecast and 10%-90% prediction intervals."""
     fig = go.Figure()
 
-    # 1. Historical / Actuals line
+    # 1. Historical / Actuals line (Neon Cyan)
     if actual_timestamps is not None and actual_values is not None and len(actual_values) > 0:
         fig.add_trace(
             go.Scatter(
@@ -32,15 +46,15 @@ def plot_forecast_with_intervals(
                 y=list(actual_values),
                 mode="lines+markers",
                 name="Actual",
-                line={"color": "#38bdf8", "width": 2.5},
-                marker={"size": 4},
-                hovertemplate="<b>Actual</b>: %{y:.1f} "
+                line={"color": THEME["actual_color"], "width": 2.5},
+                marker={"size": 4, "color": THEME["actual_color"]},
+                hovertemplate="<b>Actual</b>: %{y:,.1f} "
                 + unit
                 + "<br>%{x|%Y-%m-%d %H:%M}<extra></extra>",
             )
         )
 
-    # 2. Uncertainty intervals (filled area between Q10 and Q90)
+    # 2. Uncertainty intervals (filled area between Q10 and Q90 in Electric Violet)
     if q10 is not None and q90 is not None and len(q10) > 0 and len(q90) > 0:
         ts_list = list(timestamps)
         # Upper bound
@@ -63,43 +77,53 @@ def plot_forecast_with_intervals(
                 mode="lines",
                 line={"width": 0},
                 fill="tonexty",
-                fillcolor="rgba(245, 158, 11, 0.20)",
+                fillcolor=THEME["interval_fill"],
                 name="10%-90% Prediction Band",
                 hoverinfo="skip",
             )
         )
 
-    # 3. Point forecast line
+    # 3. Point forecast line (Electric Violet)
     fig.add_trace(
         go.Scatter(
             x=list(timestamps),
             y=list(point_forecast),
             mode="lines+markers",
             name=f"{model_name} Forecast",
-            line={"color": "#f59e0b", "width": 3, "dash": "solid"},
-            marker={"size": 5},
+            line={"color": THEME["forecast_color"], "width": 3, "dash": "solid"},
+            marker={"size": 5, "color": THEME["forecast_color"]},
             hovertemplate="<b>"
             + model_name
-            + "</b>: %{y:.1f} "
+            + "</b>: %{y:,.1f} "
             + unit
             + "<br>%{x|%Y-%m-%d %H:%M}<extra></extra>",
         )
     )
 
     fig.update_layout(
-        title={"text": f"<b>{title}</b>", "font": {"size": 18, "color": "#f8fafc"}},
-        xaxis={"title": "Time (Europe/Warsaw)", "gridcolor": "#334155", "showgrid": True},
-        yaxis={"title": f"Value ({unit})", "gridcolor": "#334155", "showgrid": True},
+        title={"text": f"<b>{title}</b>", "font": {"size": 18, "color": THEME["text_color"]}},
+        xaxis={
+            "title": "Time (Europe/Warsaw)",
+            "gridcolor": THEME["grid_color"],
+            "showgrid": True,
+            "zeroline": False,
+        },
+        yaxis={
+            "title": f"Value ({unit})",
+            "gridcolor": THEME["grid_color"],
+            "showgrid": True,
+            "zeroline": False,
+        },
         template="plotly_dark",
-        paper_bgcolor="#0f172a",
-        plot_bgcolor="#1e293b",
+        paper_bgcolor=THEME["paper_bg"],
+        plot_bgcolor=THEME["plot_bg"],
         legend={
             "orientation": "h",
             "yanchor": "bottom",
             "y": 1.02,
             "xanchor": "right",
             "x": 1,
-            "font": {"color": "#f8fafc"},
+            "font": {"color": THEME["text_color"]},
         },
         margin={"l": 50, "r": 30, "t": 60, "b": 50},
         hovermode="x unified",
@@ -116,7 +140,7 @@ def plot_generation_mix(
 
     timestamps = df["timestamp"].to_list()
 
-    # Stacked components
+    # Stacked components with TradingView palette
     if "thermal_hydro_mw" in df.columns:
         fig.add_trace(
             go.Scatter(
@@ -125,9 +149,9 @@ def plot_generation_mix(
                 mode="lines",
                 name="Thermal & Hydro",
                 stackgroup="generation",
-                line={"width": 0.5, "color": "#94a3b8"},
-                fillcolor="rgba(148, 163, 184, 0.6)",
-                hovertemplate="Thermal/Hydro: %{y:.0f} MW<extra></extra>",
+                line={"width": 0.5, "color": THEME["thermal_color"]},
+                fillcolor="rgba(71, 85, 105, 0.65)",
+                hovertemplate="Thermal/Hydro: %{y:,.0f} MW<extra></extra>",
             )
         )
 
@@ -139,9 +163,9 @@ def plot_generation_mix(
                 mode="lines",
                 name="Wind",
                 stackgroup="generation",
-                line={"width": 0.5, "color": "#34d399"},
-                fillcolor="rgba(52, 211, 153, 0.7)",
-                hovertemplate="Wind: %{y:.0f} MW<extra></extra>",
+                line={"width": 0.5, "color": THEME["wind_color"]},
+                fillcolor="rgba(16, 185, 129, 0.65)",
+                hovertemplate="Wind: %{y:,.0f} MW<extra></extra>",
             )
         )
 
@@ -153,13 +177,13 @@ def plot_generation_mix(
                 mode="lines",
                 name="Solar (PV)",
                 stackgroup="generation",
-                line={"width": 0.5, "color": "#fbbf24"},
-                fillcolor="rgba(251, 191, 36, 0.7)",
-                hovertemplate="Solar PV: %{y:.0f} MW<extra></extra>",
+                line={"width": 0.5, "color": THEME["pv_color"]},
+                fillcolor="rgba(245, 158, 11, 0.65)",
+                hovertemplate="Solar PV: %{y:,.0f} MW<extra></extra>",
             )
         )
 
-    # Demand reference overlay line
+    # Demand reference overlay line (Neon Coral)
     if "demand_mw" in df.columns:
         fig.add_trace(
             go.Scatter(
@@ -167,18 +191,28 @@ def plot_generation_mix(
                 y=df["demand_mw"].to_list(),
                 mode="lines",
                 name="Total Demand (KSE)",
-                line={"color": "#f43f5e", "width": 3, "dash": "dot"},
-                hovertemplate="Total Demand: %{y:.0f} MW<extra></extra>",
+                line={"color": THEME["demand_color"], "width": 3, "dash": "dot"},
+                hovertemplate="Total Demand: %{y:,.0f} MW<extra></extra>",
             )
         )
 
     fig.update_layout(
-        title={"text": f"<b>{title}</b>", "font": {"size": 18, "color": "#f8fafc"}},
-        xaxis={"title": "Time (Europe/Warsaw)", "gridcolor": "#334155", "showgrid": True},
-        yaxis={"title": "Power (MW)", "gridcolor": "#334155", "showgrid": True},
+        title={"text": f"<b>{title}</b>", "font": {"size": 18, "color": THEME["text_color"]}},
+        xaxis={
+            "title": "Time (Europe/Warsaw)",
+            "gridcolor": THEME["grid_color"],
+            "showgrid": True,
+            "zeroline": False,
+        },
+        yaxis={
+            "title": "Power (MW)",
+            "gridcolor": THEME["grid_color"],
+            "showgrid": True,
+            "zeroline": False,
+        },
         template="plotly_dark",
-        paper_bgcolor="#0f172a",
-        plot_bgcolor="#1e293b",
+        paper_bgcolor=THEME["paper_bg"],
+        plot_bgcolor=THEME["plot_bg"],
         legend={"orientation": "h", "yanchor": "bottom", "y": 1.02, "xanchor": "right", "x": 1},
         margin={"l": 50, "r": 30, "t": 60, "b": 50},
         hovermode="x unified",
@@ -194,34 +228,34 @@ def plot_curtailment_gauge(
     pct = min(100.0, max(0.0, curtailment_ratio * 100.0))
 
     if alert_level == "CRITICAL":
-        bar_color = "#f43f5e"
+        bar_color = THEME["demand_color"]
     elif alert_level == "WATCH":
-        bar_color = "#fbbf24"
+        bar_color = THEME["pv_color"]
     else:
-        bar_color = "#34d399"
+        bar_color = THEME["wind_color"]
 
     fig = go.Figure(
         go.Indicator(
             mode="gauge+number+delta",
             value=pct,
-            number={"suffix": "%", "font": {"size": 42, "color": "#f8fafc"}},
+            number={"suffix": "%", "font": {"size": 42, "color": THEME["text_color"]}},
             title={
                 "text": f"<b>Renewable Penetration (Risk: {alert_level})</b>",
-                "font": {"size": 16, "color": "#f8fafc"},
+                "font": {"size": 16, "color": THEME["text_color"]},
             },
             gauge={
-                "axis": {"range": [0, 100], "tickwidth": 1, "tickcolor": "#94a3b8"},
+                "axis": {"range": [0, 100], "tickwidth": 1, "tickcolor": THEME["text_muted"]},
                 "bar": {"color": bar_color, "thickness": 0.3},
-                "bgcolor": "#1e293b",
-                "borderwidth": 2,
-                "bordercolor": "#334155",
+                "bgcolor": THEME["plot_bg"],
+                "borderwidth": 1,
+                "bordercolor": THEME["grid_color"],
                 "steps": [
-                    {"range": [0, 75], "color": "rgba(52, 211, 153, 0.15)"},
-                    {"range": [75, 90], "color": "rgba(251, 191, 36, 0.25)"},
-                    {"range": [90, 100], "color": "rgba(244, 63, 94, 0.35)"},
+                    {"range": [0, 75], "color": "rgba(16, 185, 129, 0.15)"},
+                    {"range": [75, 90], "color": "rgba(245, 158, 11, 0.25)"},
+                    {"range": [90, 100], "color": "rgba(255, 59, 105, 0.35)"},
                 ],
                 "threshold": {
-                    "line": {"color": "#ef4444", "width": 4},
+                    "line": {"color": THEME["demand_color"], "width": 4},
                     "thickness": 0.8,
                     "value": 90,
                 },
@@ -230,8 +264,8 @@ def plot_curtailment_gauge(
     )
 
     fig.update_layout(
-        paper_bgcolor="#0f172a",
-        font={"color": "#f8fafc"},
+        paper_bgcolor=THEME["paper_bg"],
+        font={"color": THEME["text_color"]},
         margin={"l": 30, "r": 30, "t": 40, "b": 30},
         height=260,
     )
@@ -239,19 +273,19 @@ def plot_curtailment_gauge(
 
 
 def plot_wape_comparison(leaderboard_df: pl.DataFrame) -> go.Figure:
-    """Bar chart comparing WAPE (%) across benchmarked models."""
+    """Bar chart comparing WAPE (%) across benchmarked models in TradingView palette."""
     fig = go.Figure()
 
     models = leaderboard_df["model"].to_list()
     wapes = leaderboard_df["WAPE"].to_list()
 
-    colors = ["#f59e0b" if "TimesFM" in m else "#38bdf8" for m in models]
+    colors = [THEME["forecast_color"] if "TimesFM" in m else THEME["actual_color"] for m in models]
 
     fig.add_trace(
         go.Bar(
             x=models,
             y=wapes,
-            marker={"color": colors},
+            marker={"color": colors, "line": {"width": 0}},
             text=[f"{w:.2f}%" for w in wapes],
             textposition="auto",
             hovertemplate="<b>%{x}</b><br>WAPE: %{y:.2f}%<extra></extra>",
@@ -261,13 +295,13 @@ def plot_wape_comparison(leaderboard_df: pl.DataFrame) -> go.Figure:
     fig.update_layout(
         title={
             "text": "<b>Model Accuracy Comparison: WAPE (%)</b>",
-            "font": {"size": 16, "color": "#f8fafc"},
+            "font": {"size": 16, "color": THEME["text_color"]},
         },
-        xaxis={"title": "Model", "gridcolor": "#334155"},
-        yaxis={"title": "WAPE (%) - Lower is Better", "gridcolor": "#334155"},
+        xaxis={"title": "Model", "gridcolor": THEME["grid_color"]},
+        yaxis={"title": "WAPE (%) - Lower is Better", "gridcolor": THEME["grid_color"]},
         template="plotly_dark",
-        paper_bgcolor="#0f172a",
-        plot_bgcolor="#1e293b",
+        paper_bgcolor=THEME["paper_bg"],
+        plot_bgcolor=THEME["plot_bg"],
         margin={"l": 40, "r": 20, "t": 50, "b": 50},
     )
     return fig

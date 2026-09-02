@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     poland_centroid_lon: float = 19.4803
 
     # TimesFM Engine Configuration
-    timesfm_model_id: str = "google/timesfm-1.0-200m-pytorch"
+    timesfm_model_id: str = "google/timesfm-3.0-pytorch"
     timesfm_device: str = "cpu"
     default_forecast_horizon: int = 24
     default_context_length: int = 512
